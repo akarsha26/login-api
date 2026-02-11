@@ -112,7 +112,7 @@ async def get_database():
     if database is None:
         try:
             await connect_to_mongo()
-            # Create indexes on first connection
+            # Create indexes on first connection (after database is set)
             await create_indexes()
         except Exception as e:
             print(f"Database connection error: {e}")
@@ -123,10 +123,13 @@ async def get_database():
 async def create_indexes():
     """Create database indexes for better performance"""
     try:
-        db = await get_database()
+        # Get database directly (not through get_database to avoid circular dependency)
+        global database
+        if database is None:
+            return  # Database not connected yet
         
         # Create indexes on users collection
-        users_collection = db.users
+        users_collection = database.users
         
         # Unique index on email (ignore if already exists)
         try:
