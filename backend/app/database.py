@@ -47,7 +47,7 @@ except Exception as e:
         jwt_secret_key = os.getenv("JWT_SECRET_KEY", "")
         jwt_algorithm = os.getenv("JWT_ALGORITHM", "HS256")
         jwt_access_token_expire_minutes = int(os.getenv("JWT_ACCESS_TOKEN_EXPIRE_MINUTES", "30"))
-        jwt_refresh_token_expi re_days = int(os.getenv("JWT_REFRESH_TOKEN_EXPIRE_DAYS", "7"))
+        jwt_refresh_token_expire_days = int(os.getenv("JWT_REFRESH_TOKEN_EXPIRE_DAYS", "7"))
         smtp_host = os.getenv("SMTP_HOST", "smtp.gmail.com")
         smtp_port = int(os.getenv("SMTP_PORT", "587"))
         smtp_user = os.getenv("SMTP_USER", "")
