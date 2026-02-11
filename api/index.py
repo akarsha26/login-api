@@ -4,10 +4,12 @@ Vercel serverless function handler for FastAPI
 import sys
 import os
 
-# Add backend to path
-sys.path.insert(0, os.path.join(os.path.dirname(__file__), '..'))
+# Add project root to Python path
+project_root = os.path.dirname(os.path.dirname(__file__))
+sys.path.insert(0, project_root)
 
+# Import the FastAPI app
 from backend.app.main import app
 
-# Export the app for Vercel
+# Vercel Python runtime expects 'handler' to be the ASGI app
 handler = app
