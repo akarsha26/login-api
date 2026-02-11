@@ -25,24 +25,8 @@ app = FastAPI(
     version="1.0.0"
 )
 
-# Initialize database connection on first request (lazy loading for Vercel)
-@app.on_event("startup")
-async def startup_event():
-    """Initialize database on startup (Vercel-compatible)"""
-    try:
-        await connect_to_mongo()
-        await create_indexes()
-    except Exception as e:
-        print(f"Warning: Database connection failed on startup: {e}")
-        print("Will retry on first request")
-
-@app.on_event("shutdown")
-async def shutdown_event():
-    """Close database connection on shutdown"""
-    try:
-        await close_mongo_connection()
-    except Exception:
-        pass
+# Note: For Vercel serverless, database connections are lazy (on first request)
+# We don't use startup/shutdown events as they may not work reliably on Vercel
 
 # Add rate limiter to app state
 app.state.limiter = limiter

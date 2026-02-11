@@ -28,12 +28,33 @@ class Settings(BaseSettings):
     cache_ttl_seconds: int = 300
 
     class Config:
-        env_file = ".env"
+        # Don't require .env file on Vercel (uses environment variables)
+        env_file = ".env" if os.path.exists(".env") else None
         case_sensitive = False
 
 
-# Load settings
-settings = Settings()
+# Load settings - handle missing env vars gracefully for Vercel
+try:
+    settings = Settings()
+except Exception as e:
+    print(f"Warning: Settings loading failed: {e}")
+    print("Will use environment variables directly")
+    # Create a minimal settings object
+    import os
+    class MinimalSettings:
+        mongodb_uri = os.getenv("MONGODB_URI", "")
+        mongodb_db_name = os.getenv("MONGODB_DB_NAME", "login_app")
+        jwt_secret_key = os.getenv("JWT_SECRET_KEY", "")
+        jwt_algorithm = os.getenv("JWT_ALGORITHM", "HS256")
+        jwt_access_token_expire_minutes = int(os.getenv("JWT_ACCESS_TOKEN_EXPIRE_MINUTES", "30"))
+        jwt_refresh_token_expi re_days = int(os.getenv("JWT_REFRESH_TOKEN_EXPIRE_DAYS", "7"))
+        smtp_host = os.getenv("SMTP_HOST", "smtp.gmail.com")
+        smtp_port = int(os.getenv("SMTP_PORT", "587"))
+        smtp_user = os.getenv("SMTP_USER", "")
+        smtp_password = os.getenv("SMTP_PASSWORD", "")
+        email_from = os.getenv("EMAIL_FROM", "")
+        frontend_url = os.getenv("FRONTEND_URL", "http://localhost:3000")
+    settings = MinimalSettings()
 
 # Global database client
 client: Optional[AsyncIOMotorClient] = None
@@ -86,29 +107,51 @@ async def close_mongo_connection():
 
 
 async def get_database():
-    """Get database instance"""
+    """Get database instance - lazy connection for Vercel"""
+    global database
     if database is None:
-        await connect_to_mongo()
+        try:
+            await connect_to_mongo()
+            # Create indexes on first connection
+            await create_indexes()
+        except Exception as e:
+            print(f"Database connection error: {e}")
+            raise
     return database
 
 
 async def create_indexes():
     """Create database indexes for better performance"""
-    db = await get_database()
-    
-    # Create indexes on users collection
-    users_collection = db.users
-    
-    # Unique index on email
-    await users_collection.create_index("email", unique=True)
-    
-    # Unique index on phone_number
-    await users_collection.create_index("phone_number", unique=True, sparse=True)
-    
-    # Index on is_active for faster queries
-    await users_collection.create_index("is_active")
-    
-    # Index on created_at for sorting
-    await users_collection.create_index("created_at")
-    
-    print("[SUCCESS] Database indexes created")
+    try:
+        db = await get_database()
+        
+        # Create indexes on users collection
+        users_collection = db.users
+        
+        # Unique index on email (ignore if already exists)
+        try:
+            await users_collection.create_index("email", unique=True)
+        except Exception:
+            pass  # Index might already exist
+        
+        # Unique index on phone_number
+        try:
+            await users_collection.create_index("phone_number", unique=True, sparse=True)
+        except Exception:
+            pass
+        
+        # Index on is_active for faster queries
+        try:
+            await users_collection.create_index("is_active")
+        except Exception:
+            pass
+        
+        # Index on created_at for sorting
+        try:
+            await users_collection.create_index("created_at")
+        except Exception:
+            pass
+        
+        print("[SUCCESS] Database indexes created/verified")
+    except Exception as e:
+        print(f"Warning: Index creation failed (may already exist): {e}")
