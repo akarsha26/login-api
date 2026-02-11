@@ -10,9 +10,9 @@ from pydantic_settings import BaseSettings
 
 class Settings(BaseSettings):
     """Application settings loaded from environment variables"""
-    mongodb_uri: str
+    mongodb_uri: str = ""
     mongodb_db_name: str = "login_app"
-    jwt_secret_key: str
+    jwt_secret_key: str = ""
     jwt_algorithm: str = "HS256"
     jwt_access_token_expire_minutes: int = 30
     jwt_refresh_token_expire_days: int = 7
@@ -31,6 +31,8 @@ class Settings(BaseSettings):
         # Don't require .env file on Vercel (uses environment variables)
         env_file = ".env" if os.path.exists(".env") else None
         case_sensitive = False
+        # Allow missing values - will use defaults or env vars
+        extra = "ignore"
 
 
 # Load settings - handle missing env vars gracefully for Vercel
