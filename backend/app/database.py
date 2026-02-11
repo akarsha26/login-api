@@ -36,26 +36,33 @@ class Settings(BaseSettings):
 
 
 # Load settings - handle missing env vars gracefully for Vercel
+# Pydantic Settings automatically reads from environment variables
+# If validation fails, we'll use environment variables directly
 try:
     settings = Settings()
+    # Validate that required settings are present (from env vars)
+    if not settings.mongodb_uri:
+        settings.mongodb_uri = os.getenv("MONGODB_URI", "")
+    if not settings.jwt_secret_key:
+        settings.jwt_secret_key = os.getenv("JWT_SECRET_KEY", "")
 except Exception as e:
     print(f"Warning: Settings loading failed: {e}")
     print("Will use environment variables directly")
-    # Create a minimal settings object
-    import os
+    # Create a minimal settings object using environment variables
     class MinimalSettings:
-        mongodb_uri = os.getenv("MONGODB_URI", "")
-        mongodb_db_name = os.getenv("MONGODB_DB_NAME", "login_app")
-        jwt_secret_key = os.getenv("JWT_SECRET_KEY", "")
-        jwt_algorithm = os.getenv("JWT_ALGORITHM", "HS256")
-        jwt_access_token_expire_minutes = int(os.getenv("JWT_ACCESS_TOKEN_EXPIRE_MINUTES", "30"))
-        jwt_refresh_token_expire_days = int(os.getenv("JWT_REFRESH_TOKEN_EXPIRE_DAYS", "7"))
-        smtp_host = os.getenv("SMTP_HOST", "smtp.gmail.com")
-        smtp_port = int(os.getenv("SMTP_PORT", "587"))
-        smtp_user = os.getenv("SMTP_USER", "")
-        smtp_password = os.getenv("SMTP_PASSWORD", "")
-        email_from = os.getenv("EMAIL_FROM", "")
-        frontend_url = os.getenv("FRONTEND_URL", "http://localhost:3000")
+        def __init__(self):
+            self.mongodb_uri = os.getenv("MONGODB_URI", "")
+            self.mongodb_db_name = os.getenv("MONGODB_DB_NAME", "login_app")
+            self.jwt_secret_key = os.getenv("JWT_SECRET_KEY", "")
+            self.jwt_algorithm = os.getenv("JWT_ALGORITHM", "HS256")
+            self.jwt_access_token_expire_minutes = int(os.getenv("JWT_ACCESS_TOKEN_EXPIRE_MINUTES", "30"))
+            self.jwt_refresh_token_expire_days = int(os.getenv("JWT_REFRESH_TOKEN_EXPIRE_DAYS", "7"))
+            self.smtp_host = os.getenv("SMTP_HOST", "smtp.gmail.com")
+            self.smtp_port = int(os.getenv("SMTP_PORT", "587"))
+            self.smtp_user = os.getenv("SMTP_USER", "")
+            self.smtp_password = os.getenv("SMTP_PASSWORD", "")
+            self.email_from = os.getenv("EMAIL_FROM", "")
+            self.frontend_url = os.getenv("FRONTEND_URL", "http://localhost:3000")
     settings = MinimalSettings()
 
 # Global database client
