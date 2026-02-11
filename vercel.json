@@ -28,10 +28,4 @@
       "dest": "backend/app/main.py"
     }
   ],
-  "env": {
-    "MONGODB_URI": "@mongodb_uri",
-    "MONGODB_DB_NAME": "@mongodb_db_name",
-    "JWT_SECRET_KEY": "@jwt_secret_key",
-    "JWT_ALGORITHM": "@jwt_algorithm"
-  }
 }
