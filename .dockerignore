@@ -28,4 +28,3 @@ htmlcov
 .vercel
 test_*.py
 check_*.py
-frontend
