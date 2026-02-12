@@ -17,7 +17,7 @@ RUN pip install --no-cache-dir -r requirements.txt
 
 # Copy application code
 COPY backend/ ./backend/
-COPY .env .env
+# Note: .env file is not copied - Railway uses environment variables instead
 
 # Expose port
 EXPOSE 8000
