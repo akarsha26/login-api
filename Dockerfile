@@ -32,5 +32,6 @@ COPY start.sh /app/start.sh
 RUN chmod +x /app/start.sh
 
 # Run the application
-# Railway provides PORT environment variable
-CMD ["/app/start.sh"]
+# Railway provides PORT environment variable automatically
+# Use shell form to ensure bash executes the script
+CMD ["/bin/bash", "/app/start.sh"]
