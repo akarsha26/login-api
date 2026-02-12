@@ -27,11 +27,11 @@ EXPOSE 8000
 ENV PYTHONUNBUFFERED=1
 ENV PYTHONPATH=/app
 
-# Copy startup script
+# Copy startup scripts
 COPY start.sh /app/start.sh
-RUN chmod +x /app/start.sh
+COPY start.py /app/start.py
+RUN chmod +x /app/start.sh /app/start.py
 
-# Run the application
+# Run the application using Python script (more reliable for PORT handling)
 # Railway provides PORT environment variable automatically
-# Use shell form to ensure bash executes the script
-CMD ["/bin/bash", "/app/start.sh"]
+CMD ["python", "/app/start.py"]
