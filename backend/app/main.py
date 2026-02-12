@@ -63,10 +63,16 @@ if os.path.exists(frontend_path):
 # API endpoints
 @app.get("/api/health")
 async def health_check():
-    """Health check endpoint"""
+    """Health check endpoint - doesn't require database connection"""
+    import os
     return {
         "status": "healthy",
-        "message": "API is operational"
+        "message": "API is operational",
+        "env_check": {
+            "mongodb_uri_set": bool(os.getenv("MONGODB_URI")),
+            "jwt_secret_set": bool(os.getenv("JWT_SECRET_KEY")),
+            "port": os.getenv("PORT", "not set")
+        }
     }
 
 # Serve frontend index.html for root and non-API routes (must be last)
