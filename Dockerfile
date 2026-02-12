@@ -17,6 +17,7 @@ RUN pip install --no-cache-dir -r requirements.txt
 
 # Copy application code
 COPY backend/ ./backend/
+COPY frontend/ ./frontend/
 # Note: .env file is not copied - Railway uses environment variables instead
 
 # Expose port
@@ -27,4 +28,5 @@ ENV PYTHONUNBUFFERED=1
 ENV PYTHONPATH=/app
 
 # Run the application
-CMD ["uvicorn", "backend.app.main:app", "--host", "0.0.0.0", "--port", "8000"]
+# Railway provides PORT environment variable, default to 8000
+CMD uvicorn backend.app.main:app --host 0.0.0.0 --port ${PORT:-8000}
